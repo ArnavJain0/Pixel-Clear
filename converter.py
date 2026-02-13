@@ -1,31 +1,47 @@
-import torch
+try:
+    import torch
+    from model_arch import RRDBNet
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+
 import os
 import requests
-from model_arch import RRDBNet
 import openvino as ov
 import numpy as np
 import gc
 
 def convert_model():
-    MODEL_URL = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
-    WEIGHTS_PATH = "weights/RealESRGAN_x4plus.pth"
     OV_PATH = "weights/model.xml"
+    # Switching to RealESRGAN_x4plus_anime_6B for 4x speed and significantly lower RAM
+    WEIGHTS_PATH = "weights/RealESRGAN_x4plus_anime_6B.pth"
+    MODEL_URL = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
 
     os.makedirs("weights", exist_ok=True)
 
+    # If model already exists, we are done
+    if os.path.exists(OV_PATH):
+        print(f"[+] Intel OpenVINO model already exists at {OV_PATH}. Skipping conversion.")
+        return
+
+    if not HAS_TORCH:
+        print("[!] Torch/PyTorch is not installed. Native conversion skipped.")
+        print("[!] IMPORTANT: Please run conversion locally using 'pip install -r requirements-dev.txt'")
+        return
+
     # 1. Download PyTorch weights
     if not os.path.exists(WEIGHTS_PATH):
-        print(f"[*] Downloading source model ({MODEL_URL})...")
+        print(f"[*] Downloading lightweight model ({MODEL_URL})...")
         response = requests.get(MODEL_URL)
         with open(WEIGHTS_PATH, "wb") as f:
             f.write(response.content)
         print("[+] Download successful.")
 
-    # 2. Load PyTorch Model
-    print("[*] Initializing Neural Architecture...")
-    model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+    # 2. Load PyTorch Model (6 blocks instead of 23)
+    print("[*] Initializing Compact Neural Architecture...")
+    model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
     
-    print("[*] Loading Weights into Memory...")
+    print("[*] Loading Weights...")
     loadnet = torch.load(WEIGHTS_PATH, map_location='cpu')
     
     keyname = 'params_ema' if 'params_ema' in loadnet else 'params'
@@ -57,7 +73,7 @@ def convert_model():
     # Enable dynamic shapes for variable image sizes
     ov_model.reshape([-1, 3, -1, -1])
     
-    print("[*] Compiling Intel optimized IR: {OV_PATH}")
+    print(f"[*] Compiling Intel optimized IR: {OV_PATH}")
     ov.save_model(ov_model, OV_PATH, compress_to_fp16=True)
     print("[+] Model files saved.")
     print("[+] Optimization Complete. Engine Ready.")

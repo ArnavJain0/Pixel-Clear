@@ -1,6 +1,4 @@
 openvino>=2025.0.0
-torch>=2.5.0
-torchvision>=0.20.0
 opencv-python-headless
 flask
 flask-cors
@@ -8,4 +6,3 @@ flask-compress
 requests
 gunicorn
 numpy>=1.26.4
---extra-index-url https://download.pytorch.org/whl/cpu

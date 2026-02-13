@@ -1,309 +1,475 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pixel Clear | Ultra-Insight Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: "Outfit", sans-serif;
-        background: #0f172a;
-        color: #f8fafc;
-        overflow-x: hidden;
-      }
 
-      .glass {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Clear | Ultra-Insight Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Outfit", sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
 
-      .accent-gradient {
-        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-      }
+    .glass {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-      .comparison-slider {
-        position: relative;
-        width: 100%;
-        height: 500px;
-        overflow: hidden;
-        border-radius: 12px;
-      }
+    .accent-gradient {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    }
 
-      .comparison-slider img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
+    .comparison-slider {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #020617;
+    }
 
-      .comparison-slider .resize {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        overflow: hidden;
-        width: 50%;
-        border-right: 2px solid #38bdf8;
-      }
+    .comparison-slider img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-      .comparison-slider .handle {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 40px;
-        height: 40px;
-        background: #38bdf8;
-        border-radius: 50%;
-        cursor: ew-resize;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-        z-index: 10;
-      }
-    </style>
-  </head>
+    .comparison-slider .resize {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      overflow: hidden;
+      width: 50%;
+      border-right: 2px solid #38bdf8;
+    }
 
-  <body class="min-h-screen">
-    <nav class="p-6 flex justify-between items-center border-b border-white/5">
-      <a
-        href="/"
-        id="logo-link"
-        class="text-2xl font-bold tracking-tight accent-gradient bg-clip-text text-transparent hover:scale-105 transition-transform"
-        >PIXEL CLEAR</a
-      >
-      <div
-        class="px-3 py-1 glass rounded-full text-xs font-semibold text-sky-400 uppercase tracking-widest"
-      >
-        Intel OpenVINO Powered
-      </div>
-    </nav>
+    .comparison-slider .handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: #38bdf8;
+      border-radius: 50%;
+      cursor: ew-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+      z-index: 10;
+    }
 
-    <main class="max-w-6xl mx-auto p-6 md:p-12">
-      <div class="grid md:grid-cols-1 gap-12">
-        <div class="glass p-8 rounded-3xl space-y-6">
-          <div class="space-y-2">
-            <h2 class="text-3xl font-bold">Resurrect your images.</h2>
-            <p class="text-slate-400">
-              Powered by the Ultra-Insight Engine for professional-grade detail
-              restoration.
-            </p>
+    /* Snake Game Styles */
+    #snake-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #020617;
+      border: 2px solid #1e293b;
+    }
+
+    #snake-canvas {
+      display: block;
+      margin: 0 auto;
+      cursor: crosshair;
+    }
+
+    .game-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.8);
+      z-index: 5;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  <nav class="p-6 flex justify-between items-center border-b border-white/5">
+    <div class="flex items-center gap-6">
+      <a href="/" id="logo-link"
+        class="text-2xl font-bold tracking-tight accent-gradient bg-clip-text text-transparent hover:scale-105 transition-transform">PIXEL
+        CLEAR</a>
+      <button id="nav-home"
+        class="hidden text-sm font-semibold text-slate-400 hover:text-white transition-colors">Home</button>
+      <button id="nav-processing"
+        class="hidden text-sm font-semibold text-sky-400 hover:text-sky-300 transition-colors animate-pulse">Back to
+        Processing</button>
+    </div>
+    <div class="px-3 py-1 glass rounded-full text-xs font-semibold text-sky-400 uppercase tracking-widest">
+      Intel OpenVINO Powered
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto p-6 md:p-12">
+    <div class="grid md:grid-cols-1 gap-12">
+
+      <!-- Hero Section -->
+      <section id="hero-section" class="glass p-8 rounded-3xl space-y-8 animate-in fade-in duration-700">
+        <div class="space-y-2">
+          <h2 class="text-3xl font-bold">Resurrect your images.</h2>
+          <p class="text-slate-400">Powered by the Ultra-Insight Engine for professional-grade detail restoration.</p>
+        </div>
+
+        <div id="drop-zone"
+          class="border-2 border-dashed border-slate-700 rounded-2xl p-12 text-center hover:border-sky-500 transition-colors cursor-pointer group">
+          <input type="file" id="file-input" class="hidden" accept="image/*" />
+          <div class="mb-4 text-sky-500 group-hover:scale-110 transition-transform">
+            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
           </div>
+          <p class="font-medium">Drop your image here or <span class="text-sky-400">browse</span></p>
+          <p class="text-xs text-slate-500 mt-2">Supports JPG, PNG up to 10MB</p>
+        </div>
 
-          <div
-            id="drop-zone"
-            class="border-2 border-dashed border-slate-700 rounded-2xl p-12 text-center hover:border-sky-500 transition-colors cursor-pointer group"
-          >
-            <input
-              type="file"
-              id="file-input"
-              class="hidden"
-              accept="image/*"
-            />
-            <div
-              class="mb-4 text-sky-500 group-hover:scale-110 transition-transform"
-            >
-              <svg
-                class="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                ></path>
-              </svg>
-            </div>
-            <p class="font-medium">
-              Drop your image here or <span class="text-sky-400">browse</span>
-            </p>
-            <p class="text-xs text-slate-500 mt-2">
-              Supports JPG, PNG up to 10MB
-            </p>
-          </div>
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+          <button id="btn-demo"
+            class="bg-slate-800/50 border border-slate-700 hover:bg-slate-800 px-6 py-2 rounded-xl text-sm font-semibold transition-all">✨
+            View Sample Conversion</button>
+          <button id="btn-play-snake"
+            class="bg-slate-800/50 border border-slate-700 hover:border-sky-500 px-6 py-2 rounded-xl text-sm font-semibold transition-all">🍎
+            Bored? Play Snake</button>
+        </div>
+      </section>
 
-          <div
-            id="process-card"
-            class="hidden glass p-6 rounded-2xl animate-pulse"
-          >
-            <div class="flex justify-between items-center mb-4">
-              <span
-                id="status-msg"
-                class="text-sm font-semibold text-sky-400 tracking-wider uppercase"
-                >INITIALIZING ENGINE...</span
-              >
-              <span id="eta-msg" class="text-xs text-slate-400 italic"
-                >Calculating ETA...</span
-              >
+      <!-- Processing Section -->
+      <section id="process-card" class="hidden space-y-8 animate-in slide-in-from-bottom-5 duration-500">
+        <div class="glass p-8 rounded-3xl">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <span id="status-msg" class="text-sm font-semibold text-sky-400 tracking-wider uppercase">INITIALIZING
+                ENGINE...</span>
+              <p id="eta-msg" class="text-xs text-slate-400 italic mt-1">Calculating ETA...</p>
             </div>
-            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div
-                id="progress-bar"
-                class="h-full accent-gradient transition-all duration-500"
-                style="width: 0%"
-              ></div>
+            <div class="text-right">
+              <span id="percent-text" class="text-2xl font-bold">0%</span>
             </div>
           </div>
-
-          <div id="result-container" class="hidden space-y-6">
-            <div class="comparison-slider" id="slider">
-              <img id="img-after" src="" alt="After" />
-              <div class="resize">
-                <img id="img-before" src="" alt="Before" />
-              </div>
-              <div class="handle">
-                <svg
-                  class="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 7l-4 4m0 0l4 4m-4-4h18M16 7l4 4m0 0l-4 4m4-4H2"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-            <div class="flex justify-center">
-              <a
-                id="download-link"
-                href="#"
-                download
-                class="accent-gradient px-8 py-3 rounded-xl font-bold hover:scale-105 transition-transform"
-                >Download Master Copy</a
-              >
-            </div>
+          <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5">
+            <div id="progress-bar" class="h-full accent-gradient transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
-      </div>
-    </main>
 
-    <footer
-      class="max-w-6xl mx-auto p-12 text-center border-t border-white/5 mt-12"
-    >
-      <p class="text-slate-500 text-sm font-medium">
-        ©️ Copyright 2026. All rights reserved. <br> made by <span class="text-sky-400">Arnav Jain</span>
-      </p>
-    </footer>
+        <!-- Snake Game -->
+        <div id="game-zone" class="glass p-8 rounded-3xl space-y-6">
+          <div class="text-center">
+            <h3 class="text-xl font-bold text-slate-200">Processing can take a minute.</h3>
+            <p class="text-sm text-slate-400">Keep the window open and enjoy a classic!</p>
+          </div>
+          <div id="snake-container" class="shadow-2xl shadow-sky-500/10">
+            <canvas id="snake-canvas" width="400" height="300"></canvas>
+            <div id="game-over-overlay" class="game-overlay hidden">
+              <h2 class="text-2xl font-bold text-red-500 mb-2">Game Over!</h2>
+              <p id="final-score" class="text-lg text-white mb-2">Score: 0</p>
+              <p class="text-xs text-slate-400 mb-4 tracking-widest uppercase">Press <span
+                  class="text-white font-bold">R</span> to Restart</p>
+              <button onclick="startGame()"
+                class="bg-sky-500 hover:bg-sky-600 px-8 py-3 rounded-xl font-bold transition-all">Start New
+                Mission</button>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold text-sky-400">Score: <span id="current-score">0</span></p>
+          </div>
+        </div>
+      </section>
 
-    <script>
-      const dropZone = document.getElementById("drop-zone");
-      const fileInput = document.getElementById("file-input");
-      const processCard = document.getElementById("process-card");
-      const resultContainer = document.getElementById("result-container");
-      const progressBar = document.getElementById("progress-bar");
-      const statusMsg = document.getElementById("status-msg");
-      const etaMsg = document.getElementById("eta-msg");
-      const imgBefore = document.getElementById("img-before");
-      const imgAfter = document.getElementById("img-after");
-      const downloadLink = document.getElementById("download-link");
-      const logoLink = document.getElementById("logo-link");
+      <!-- Result Section -->
+      <section id="result-container" class="hidden space-y-6 animate-in zoom-in-95 duration-500">
+        <div class="flex justify-between items-center">
+          <h2 id="result-title" class="text-2xl font-bold">Processing Complete</h2>
+          <button id="btn-back-to-home"
+            class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Return to
+            Home</button>
+        </div>
+        <div class="comparison-slider" id="slider">
+          <img id="img-after" src="" alt="After" />
+          <div class="resize">
+            <img id="img-before" src="" alt="Before" />
+          </div>
+          <div class="handle">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7l-4 4m0 0l4 4m-4-4h18M16 7l4 4m0 0l-4 4m4-4H2"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="flex flex-col items-center gap-4">
+          <a id="download-link" href="#" download
+            class="accent-gradient px-10 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-xl shadow-sky-500/20">Download
+            Master Image</a>
+          <p class="text-slate-500 text-xs text-center px-8">Ultra-Insight filters applied: Selective Contrast (CLAHE),
+            Interactive Sharpening, and OpenVINO 4x Scaling.</p>
+        </div>
+      </section>
 
-      logoLink.onclick = (e) => {
-        e.preventDefault();
-        resetUI();
-      };
+    </div>
+  </main>
 
-      function resetUI() {
-        dropZone.classList.remove("hidden");
-        processCard.classList.add("hidden");
-        resultContainer.classList.add("hidden");
-        fileInput.value = "";
-        statusMsg.innerText = "INITIALIZING ENGINE...";
-        progressBar.style.width = "0%";
-        etaMsg.innerText = "Calculating ETA...";
+  <footer class="max-w-6xl mx-auto p-12 text-center border-t border-white/5 mt-12">
+    <p class="text-slate-500 text-sm font-medium">©️ Copyright 2026. All rights reserved. <br> Built by <span
+        class="text-sky-400">Arnav Jain</span> for high-performance Intel Inference.</p>
+  </footer>
+
+  <script>
+    const heroSection = document.getElementById("hero-section");
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const processCard = document.getElementById("process-card");
+    const resultContainer = document.getElementById("result-container");
+    const progressBar = document.getElementById("progress-bar");
+    const percentText = document.getElementById("percent-text");
+    const statusMsg = document.getElementById("status-msg");
+    const etaMsg = document.getElementById("eta-msg");
+    const imgBefore = document.getElementById("img-before");
+    const imgAfter = document.getElementById("img-after");
+    const downloadLink = document.getElementById("download-link");
+    const resultTitle = document.getElementById("result-title");
+
+    const navHome = document.getElementById("nav-home");
+    const navProcessing = document.getElementById("nav-processing");
+    const btnDemo = document.getElementById("btn-demo");
+    const btnPlaySnake = document.getElementById("btn-play-snake");
+    const btnBackHome = document.getElementById("btn-back-to-home");
+
+    let currentTaskId = null;
+    let isProcessing = false;
+
+    function showSection(id) {
+      heroSection.classList.add("hidden");
+      processCard.classList.add("hidden");
+      resultContainer.classList.add("hidden");
+      document.getElementById(id).classList.remove("hidden");
+
+      navHome.classList.toggle("hidden", id === "hero-section");
+      navProcessing.classList.toggle("hidden", id !== "hero-section" && !isProcessing);
+      if (id === "process-card") navProcessing.classList.add("hidden");
+    }
+
+    navHome.onclick = () => showSection("hero-section");
+    navProcessing.onclick = () => showSection("process-card");
+    btnBackHome.onclick = () => showSection("hero-section");
+
+    btnPlaySnake.onclick = () => {
+      showSection("process-card");
+      if (!gameRunning) startGame();
+    };
+
+    btnDemo.onclick = () => {
+      imgBefore.src = "/static/demo_before.png";
+      imgAfter.src = "/static/demo_after.png";
+      resultTitle.innerText = "Sample Conversion Preview";
+      downloadLink.classList.add("hidden");
+      showSection("result-container");
+      initSlider();
+    };
+
+    dropZone.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) handleUpload(file);
+    };
+
+    async function handleUpload(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const reader = new FileReader();
+      reader.onload = (e) => (imgBefore.src = e.target.result);
+      reader.readAsDataURL(file);
+
+      isProcessing = true;
+      showSection("process-card");
+      startGame();
+
+      try {
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const { task_id } = await res.json();
+        currentTaskId = task_id;
+        pollStatus(task_id);
+      } catch (err) {
+        alert("Connection Error. Is the backend running?");
+        isProcessing = false;
+        showSection("hero-section");
       }
+    }
 
-      dropZone.onclick = () => fileInput.click();
-
-      fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) handleUpload(file);
-      };
-
-      async function handleUpload(file) {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        // Preview Original
-        const reader = new FileReader();
-        reader.onload = (e) => (imgBefore.src = e.target.result);
-        reader.readAsDataURL(file);
-
-        dropZone.classList.add("hidden");
-        processCard.classList.remove("hidden");
-        resultContainer.classList.add("hidden");
-
+    function pollStatus(taskId) {
+      const interval = setInterval(async () => {
         try {
-          const res = await fetch("/upload", {
-            method: "POST",
-            body: formData,
-          });
-          const { task_id } = await res.json();
-          pollStatus(task_id);
-        } catch (err) {
-          alert("Upload failed. Ensure backend is running.");
-        }
-      }
-
-      function pollStatus(taskId) {
-        const interval = setInterval(async () => {
           const res = await fetch(`/status/${taskId}`);
           const data = await res.json();
 
           if (data.status === "completed") {
             clearInterval(interval);
+            isProcessing = false;
             showResult(taskId);
           } else if (data.status === "error") {
             clearInterval(interval);
-            alert(data.message);
+            isProcessing = false;
+            alert(`Engine Error: ${data.message}`);
+            showSection("hero-section");
           } else {
             progressBar.style.width = `${data.progress}%`;
-            statusMsg.innerText = data.message || "Restoring...";
-            etaMsg.innerText =
-              data.remaining >= 0
-                ? `ETA: ${data.remaining}s`
-                : "Calculating...";
+            percentText.innerText = `${data.progress}%`;
+            statusMsg.innerText = data.message || "Enhancing...";
+            etaMsg.innerText = data.remaining >= 0 ? `ETA: ~${data.remaining}s` : "Optimizing AI weights...";
           }
-        }, 800);
+        } catch (e) {
+          clearInterval(interval);
+          isProcessing = false;
+        }
+      }, 1000);
+    }
+
+    function showResult(taskId) {
+      resultTitle.innerText = "Restoration Complete";
+      downloadLink.classList.remove("hidden");
+      imgAfter.src = `/image/${taskId}`;
+      downloadLink.href = `/download/${taskId}`;
+      showSection("result-container");
+      initSlider();
+    }
+
+    function initSlider() {
+      const slider = document.getElementById("slider");
+      const resize = slider.querySelector(".resize");
+      const handle = slider.querySelector(".handle");
+
+      resize.style.width = "50%";
+      handle.style.left = "50%";
+
+      const move = (e) => {
+        let x = (e.pageX || (e.touches ? e.touches[0].pageX : 0)) - slider.getBoundingClientRect().left;
+        if (x < 0) x = 0;
+        if (x > slider.offsetWidth) x = slider.offsetWidth;
+        resize.style.width = x + "px";
+        handle.style.left = x + "px";
+      };
+
+      slider.onmousemove = move;
+      slider.ontouchmove = move;
+    }
+
+    const canvas = document.getElementById("snake-canvas");
+    const ctx = canvas.getContext("2d");
+    const box = 20;
+    let snake, food, d, score, gameRunning;
+
+    window.addEventListener("keydown", (e) => {
+      const blockedKeys = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD", "KeyR"];
+      if (blockedKeys.includes(e.code)) {
+        e.preventDefault();
       }
 
-      function showResult(taskId) {
-        processCard.classList.add("hidden");
-        resultContainer.classList.remove("hidden");
-        imgAfter.src = `/image/${taskId}`;
-        downloadLink.href = `/download/${taskId}`;
-        initSlider();
+      const gameOverOverlay = document.getElementById("game-over-overlay");
+
+      // Restart logic (using 'R' for Reliability)
+      if (e.code === "KeyR" && !gameOverOverlay.classList.contains("hidden")) {
+        startGame();
+        return;
       }
 
-      function initSlider() {
-        const slider = document.getElementById("slider");
-        const resize = slider.querySelector(".resize");
-        const handle = slider.querySelector(".handle");
+      if ((e.code === "ArrowLeft" || e.code === "KeyA") && d != "RIGHT") d = "LEFT";
+      else if ((e.code === "ArrowUp" || e.code === "KeyW") && d != "DOWN") d = "UP";
+      else if ((e.code === "ArrowRight" || e.code === "KeyD") && d != "LEFT") d = "RIGHT";
+      else if ((e.code === "ArrowDown" || e.code === "KeyS") && d != "UP") d = "DOWN";
+    });
 
-        slider.addEventListener("mousemove", (e) => {
-          let x = e.pageX - slider.getBoundingClientRect().left;
-          if (x < 0) x = 0;
-          if (x > slider.offsetWidth) x = slider.offsetWidth;
-          resize.style.width = x + "px";
-          handle.style.left = x + "px";
-        });
+    function startGame() {
+      score = 0;
+      d = "RIGHT";
+      snake = [{ x: 9 * box, y: 10 * box }];
+      food = {
+        x: Math.floor(Math.random() * 19 + 1) * box,
+        y: Math.floor(Math.random() * 14 + 1) * box,
+      };
+      document.getElementById("current-score").innerText = score;
+      document.getElementById("game-over-overlay").classList.add("hidden");
+      if (gameRunning) clearInterval(gameRunning);
+      gameRunning = setInterval(draw, 120);
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i == 0) ? "#38bdf8" : "#1e293b";
+        ctx.beginPath();
+        ctx.roundRect(snake[i].x, snake[i].y, box - 1, box - 1, 4);
+        ctx.fill();
       }
-    </script>
-  </body>
+
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(food.x + box / 2, food.y + box / 2, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      let snakeX = snake[0].x;
+      let snakeY = snake[0].y;
+
+      if (d == "LEFT") snakeX -= box;
+      if (d == "UP") snakeY -= box;
+      if (d == "RIGHT") snakeX += box;
+      if (d == "DOWN") snakeY += box;
+
+      if (snakeX == food.x && snakeY == food.y) {
+        score++;
+        document.getElementById("current-score").innerText = score;
+        food = {
+          x: Math.floor(Math.random() * 19 + 1) * box,
+          y: Math.floor(Math.random() * 14 + 1) * box,
+        };
+      } else {
+        snake.pop();
+      }
+
+      let newHead = { x: snakeX, y: snakeY };
+
+      if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+        clearInterval(gameRunning);
+        gameRunning = null;
+        document.getElementById("final-score").innerText = `Result Score: ${score}`;
+        document.getElementById("game-over-overlay").classList.remove("hidden");
+      }
+      snake.unshift(newHead);
+    }
+
+    function collision(head, array) {
+      for (let i = 0; i < array.length; i++) {
+        if (head.x == array[i].x && head.y == array[i].y) return true;
+      }
+      return false;
+    }
+  </script>
+</body>
+
 </html>

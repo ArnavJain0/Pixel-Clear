@@ -46,6 +46,9 @@ Pixel Clear splits images into **512px tiles** with **10px padding** to ensure h
    ```bash
    pip install -r requirements.txt && python converter.py
    ```
+   > [!IMPORTANT]
+   > For the fastest and most reliable deployment, run `python converter.py` locally once and **commit the `weights/` folder** to your repository. This allows Render to skip the heavy model conversion step and stay within memory limits.
+
 4. Start command:
    ```bash
    gunicorn app:app
