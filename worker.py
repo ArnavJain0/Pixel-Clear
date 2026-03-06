@@ -1,90 +1,77 @@
-# ============================================================
-# worker.py – Pixel-Clear high-quality OpenCV enhancement
-# ------------------------------------------------------------
-# NO neural network. NO openvino. NO model loading.
-# Peak RAM usage: ~15–25 MB regardless of image size.
-# Input: already-resized ≤480px JPEG from the browser.
-# Output: 4× upscaled JPEG with multi-pass sharpening.
-# ============================================================
 import sys
+import os
 import cv2
 import numpy as np
+import requests
 
+# ------------------------------------------------------------------
+# AI Model Configuration (FSRCNN 4x)
+# This model is tiny (88 KB) but significantly better than Lanczos4.
+# It runs with almost ZERO memory overhead compared to RealESRGAN.
+# ------------------------------------------------------------------
+MODEL_PATH = "weights/FSRCNN_x4.pb"
+MODEL_URL  = "https://github.com/Saafke/FSRCNN_Tensorflow/raw/master/models/FSRCNN_x4.pb"
+MAX_DIM    = 480    # hard cap — browser already does this, guard again
+SCALE      = 4      # upscale factor
 
-MAX_DIM = 480    # hard cap — browser already does this, guard again
-SCALE   = 4      # upscale factor
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        os.makedirs("weights", exist_ok=True)
+        print(f"[*] Downloading Super-Res Model ({MODEL_URL})...")
+        r = requests.get(MODEL_URL)
+        with open(MODEL_PATH, "wb") as f:
+            f.write(r.content)
+        print("[+] Download complete.")
 
-
-def unsharp_mask(img, sigma=1.5, strength=1.2):
-    """Classic unsharp mask: sharpens edges without halos."""
-    blur   = cv2.GaussianBlur(img, (0, 0), sigma)
-    sharp  = cv2.addWeighted(img, 1 + strength, blur, -strength, 0)
-    return sharp
-
-
-def clahe_enhance(img):
-    """CLAHE on the L channel of LAB — boosts local contrast."""
+def apply_filters(img):
+    """Refined post-processing for AI output."""
     lab     = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
-    cl      = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(l)
-    return cv2.cvtColor(cv2.merge((cl, a, b)), cv2.COLOR_LAB2BGR)
+    # CLAHE for local contrast enhancement
+    cl      = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(l)
+    img     = cv2.cvtColor(cv2.merge((cl, a, b)), cv2.COLOR_LAB2BGR)
+    
+    # Mild sharpening (unsharp mask)
+    blur    = cv2.GaussianBlur(img, (0, 0), 2.0)
+    img     = cv2.addWeighted(img, 1.3, blur, -0.3, 0)
+    
+    # Mild brightness/contrast lift
+    return cv2.convertScaleAbs(img, alpha=1.03, beta=2)
 
-
-def deblur_wiener(img, radius=1):
-    """
-    Simple frequency-domain deblur via a mild Wiener-like filter.
-    Corrects moderate camera/motion blur without AI.
-    """
-    kernel_size = 2 * radius + 1
-    kernel      = np.zeros((kernel_size, kernel_size), dtype=np.float32)
-    kernel[radius, radius] = 1.0
-    # Use the sharpening kernel (Laplacian boost) instead of a full Wiener
-    sharpen_k = np.array([[ 0, -1,  0],
-                           [-1,  5, -1],
-                           [ 0, -1,  0]], dtype=np.float32)
-    return cv2.filter2D(img, -1, sharpen_k)
-
-
-def enhance(img):
-    h, w = img.shape[:2]
-
-    # 1. Upscale 4× with Lanczos (best quality among non-AI methods)
-    big = cv2.resize(img, (w * SCALE, h * SCALE),
-                     interpolation=cv2.INTER_LANCZOS4)
-
-    # 2. CLAHE contrast boost
-    big = clahe_enhance(big)
-
-    # 3. Multi-pass unsharp mask (two passes at different scales)
-    big = unsharp_mask(big, sigma=1.0, strength=0.8)
-    big = unsharp_mask(big, sigma=2.0, strength=0.4)
-
-    # 4. Mild deblur / detail pop
-    big = deblur_wiener(big)
-
-    # 5. Brightness/saturation micro-lift
-    big = cv2.convertScaleAbs(big, alpha=1.04, beta=3)
-
-    return big
-
+def run_ai_upscale(img):
+    # Initialize OpenCV Super-Resolution module
+    sr = cv2.dnn_superres.DnnSuperResImpl_create()
+    sr.readModel(MODEL_PATH)
+    sr.setModel("fsrcnn", SCALE)
+    
+    # Upscale (one-shot, very fast on CPU)
+    return sr.upsample(img)
 
 def run(input_path, output_path):
+    download_model()
+    
     img = cv2.imread(input_path)
     if img is None:
         print("ERR: cannot read input image", file=sys.stderr)
         sys.exit(1)
 
-    # Guard: cap to MAX_DIM before upscaling
     h, w = img.shape[:2]
+    # Guard: cap to MAX_DIM before upscaling
     if max(h, w) > MAX_DIM:
         scale = MAX_DIM / max(h, w)
         img   = cv2.resize(img, (int(w * scale), int(h * scale)),
                            interpolation=cv2.INTER_AREA)
 
-    result = enhance(img)
+    # 1. AI Super-Resolution (FSRCNN)
+    print("[*] Running AI Restoration Engine...")
+    result = run_ai_upscale(img)
+    
+    # 2. Premium Post-processing
+    print("[*] Perfecting output filters...")
+    result = apply_filters(result)
+    
     cv2.imwrite(output_path, result, [cv2.IMWRITE_JPEG_QUALITY, 90])
     print(f"OK: saved {output_path}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
