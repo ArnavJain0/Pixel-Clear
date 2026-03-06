@@ -1,8 +1,7 @@
-openvino>=2025.0.0
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
 opencv-python-headless
-flask
-flask-cors
-flask-compress
-requests
-gunicorn
 numpy>=1.26.4
+requests

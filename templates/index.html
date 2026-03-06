@@ -294,17 +294,54 @@
       if (file) handleUpload(file);
     };
 
+    async function resizeImage(file, maxDim = 480) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let w = img.width;
+            let h = img.height;
+            if (w > h) {
+              if (w > maxDim) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              }
+            } else {
+              if (h > maxDim) {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     async function handleUpload(file) {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const reader = new FileReader();
-      reader.onload = (e) => (imgBefore.src = e.target.result);
-      reader.readAsDataURL(file);
-
       isProcessing = true;
       showSection("process-card");
       startGame();
+
+      // Client-Side Intelligence: Offload the heavy resizing to the user's browser
+      statusMsg.innerText = "PRE-PROCESSING (CLIENT)...";
+      const optimizedBlob = await resizeImage(file);
+
+      const formData = new FormData();
+      formData.append("image", optimizedBlob, "upload.jpg");
+
+      // Set preview from the original for comparison later
+      const reader = new FileReader();
+      reader.onload = (e) => (imgBefore.src = e.target.result);
+      reader.readAsDataURL(file);
 
       try {
         const res = await fetch("/upload", {
@@ -327,6 +364,10 @@
           const res = await fetch(`/status/${taskId}`);
           const data = await res.json();
 
+          // Ensure progress and remaining have safe defaults
+          const progress = typeof data.progress === 'number' ? data.progress : 0;
+          const remaining = typeof data.remaining === 'number' ? data.remaining : 0;
+
           if (data.status === "completed") {
             clearInterval(interval);
             isProcessing = false;
@@ -337,10 +378,13 @@
             alert(`Engine Error: ${data.message}`);
             showSection("hero-section");
           } else {
-            progressBar.style.width = `${data.progress}%`;
-            percentText.innerText = `${data.progress}%`;
+            // Update UI only when we have a meaningful progress value
+            if (progress > 0) {
+              progressBar.style.width = `${progress}%`;
+              percentText.innerText = `${progress}%`;
+            }
             statusMsg.innerText = data.message || "Enhancing...";
-            etaMsg.innerText = data.remaining >= 0 ? `ETA: ~${data.remaining}s` : "Optimizing AI weights...";
+            etaMsg.innerText = remaining >= 0 ? `ETA: ~${remaining}s` : "Optimizing AI weights...";
           }
         } catch (e) {
           clearInterval(interval);

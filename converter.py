@@ -7,9 +7,14 @@ except ImportError:
 
 import os
 import requests
-import openvino as ov
-import numpy as np
-import gc
+
+try:
+    import openvino as ov
+    import numpy as np
+    HAS_OV = True
+except ImportError:
+    HAS_OV = False
+
 
 def convert_model():
     OV_PATH = "weights/model.xml"
@@ -24,9 +29,9 @@ def convert_model():
         print(f"[+] Intel OpenVINO model already exists at {OV_PATH}. Skipping conversion.")
         return
 
-    if not HAS_TORCH:
-        print("[!] Torch/PyTorch is not installed. Native conversion skipped.")
-        print("[!] IMPORTANT: Please run conversion locally using 'pip install -r requirements-dev.txt'")
+    if not HAS_TORCH or not HAS_OV:
+        print("[!] Torch or OpenVINO not installed. Skipping conversion.")
+        print("[!] Run conversion locally: pip install -r requirements-dev.txt")
         return
 
     # 1. Download PyTorch weights
