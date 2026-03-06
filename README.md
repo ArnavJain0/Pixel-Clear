@@ -1,55 +1,54 @@
-# ✨ Pixel Clear: Ultra-Insight Engine
+# ✨ Pixel Clear: High-Performance AI Image Restoration
 
-Pixel Clear is a professional-grade image restoration dashboard optimized specifically for **Intel CPU** performance via **OpenVINO**.
+**Pixel Clear** is a professional-grade image restoration dashboard optimized for high-performance, low-RAM execution. It uses the **FSRCNN** neural network for 4x super-resolution and custom filters for high-quality deblurring.
 
-## 🚀 Why Pixel Clear?
+---
 
-Standard upscalers take forever on CPUs. Pixel Clear uses Intel's OpenVINO toolkit to achieve **2-5x faster inference** by compiling neural networks directly for your processor.
+## 🚀 Key Features
 
-### Core Features:
-- **Ultra-Insight Engine**: Beyond simple upscaling, we apply selective texture enhancement and intelligent lighting restoration.
-- **Intel Optimization**: Native execution on Intel hardware—no NVIDIA GPU required.
-- **Comparison Visualizer**: Professional side-by-side comparison slider.
-- **Human-Centric UI**: A sleek, dark-mode dashboard with live ETA and phase tracking.
+*   **PCA-Optimized Pipeline**: Memory-efficient architecture that isolates heavy AI tasks to short-lived subprocesses, ensuring it runs perfectly on free-tier hosting (like Render.com 512MB RAM).
+*   **Edge Computing**: Client-side resizing via HTML5 Canvas prevents large file uploads and server crashes.
+*   **Professional Comparison Visualizer**: Interactive side-by-side slider for real-time quality comparison.
+*   **Modern Dashboard**: Sleek, dark-mode UI with live progress tracking and built-in interactive Snake game for wait times.
+
+---
 
 ## 🛠️ Performance Architecture
 
-Pixel Clear splits images into **512px tiles** with **10px padding** to ensure high-resolution images are processed without memory overflow. Our post-processing pipeline includes:
-1. **Selective Contrast (CLAHE)**: Enhances local details without blowing out highlights.
-2. **Interactive Sharpening**: Digitally reconstructs edges lost during blur.
-3. **OpenVINO Inference**: Runs the SRGAN model at peak hardware efficiency.
+1.  **AI Reconstruction (`FSRCNN x4`)**: Uses a lightweight neural network (88KB) to reconstruct missing details, providing high-quality upscaling with minimal resource cost.
+2.  **Selective Contrast (CLAHE)**: Normalizes lighting and enhances local textures without overexposing highlights.
+3.  **Unsharp Masking**: Mathematically sharpened edges to provide a crisp, deblurred look.
+4.  **Subprocess Isolation**: The AI model is only loaded into the RAM during the seconds it's actively working, completely freeing memory on task completion.
 
-## 💻 Running the Project
+---
 
-1. **Setup Environment**:
-   ```bash
-   python3.11 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+## 💻 Running the Project Locally
 
-2. **Convert Model (One-time Optimization)**:
-   ```bash
-   python converter.py
-   ```
+1.  **Setup Environment**:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    pip install -r requirements.txt
+    ```
 
-3. **Start Dashboard**:
-   ```bash
-   python app.py
-   ```
+2.  **Start Dashboard**:
+    ```bash
+    uvicorn server:app --reload --port 5000
+    ```
+
+3.  **Open Browser**: `http://localhost:5000`
+
+---
 
 ## 🌐 Cloud Deployment (Render.com)
 
-1. Connect your GitHub repo to Render.
-2. Choose **Web Service**.
-3. Use the following build command:
-   ```bash
-   pip install -r requirements.txt && python converter.py
-   ```
-   > [!IMPORTANT]
-   > For the fastest and most reliable deployment, run `python converter.py` locally once and **commit the `weights/` folder** to your repository. This allows Render to skip the heavy model conversion step and stay within memory limits.
+1.  Connect your GitHub repo to **Render**.
+2.  Choose **Web Service**.
+3.  **Build Command**: `pip install -r requirements.txt`  
+    *(Note: Remove any reference to `python converter.py` as it is now redundant.)*
+4.  **Start Command**: `uvicorn server:app --host 0.0.0.0 --port $PORT`
 
-4. Start command:
-   ```bash
-   gunicorn app:app
-   ```
+---
+
+## 🎓 For Viva Preparation
+See [about.md](about.md) for a complete technical guide, file-by-file breakdown, and expected questions/answers on the project's internal mechanics and AI implementation.

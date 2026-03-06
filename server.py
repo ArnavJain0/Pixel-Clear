@@ -21,7 +21,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # ── Configuration ────────────────────────────────────────────
-MODEL_XML            = "weights/model.xml"
 DB_PATH              = "tasks.db"
 RESULTS_DIR          = "static/results"
 TMP_DIR              = "/tmp"
